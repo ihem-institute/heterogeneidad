@@ -26,7 +26,7 @@ public class TestScreen16 {
 		// int improve = 1; // use 0 for fast results. Use 1 to better fir and
 		// to
 		// decrease the error
-		int maxCells = 3; // maximum number of cells to be tested
+		int maxCells = 4; // maximum number of cells to be tested
 		double okError = 0.0001;// when reached, the search for better
 //		combination of cells and frequency stops
 		HashMap<String, Double> model = new HashMap<String, Double>();
@@ -254,11 +254,11 @@ are selected the program may take too long to get an
 //					"\nerror values " + setHetero.get(i));
 //			}
 //			else{
-			System.out.println(heteroIndex);
+//			System.out.println(heteroIndex);
 			double sumErr = sumErr(setHetero.get(i));
 			System.out.println(sumErr);
-			double area = area(setHetero.get(i));
-			System.out.println(area+ "\n");
+//			double area = area(setHetero.get(i));
+//			System.out.println(area+ "\n");
 			}
 
 		
@@ -276,7 +276,7 @@ are selected the program may take too long to get an
 		}
 //		System.out.println(index + " relative error value " + (setHetero.get(index-1)-setHetero.get(index))/setHetero.get(0));	
 		if (setHetero.get(index)/setHetero.get(0)> 0.004){
-			System.out.println("bad adjusting  " + setHetero.get(index));
+			//System.out.println("bad adjusting  " + setHetero.get(index));
 			index = index +1;
 		}
 		return index;
@@ -326,6 +326,7 @@ are selected the program may take too long to get an
 		// TODO Auto-generated method stub
 		GetValues.main();
 	}
+
 
 	/*
 	 * This method generate a set of array of proportions up and down the best
