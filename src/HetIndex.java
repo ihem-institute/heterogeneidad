@@ -1,45 +1,37 @@
 
 //import java.io.BufferedReader;populationProp
-import java.io.IOException;
-import java.io.InputStreamReader;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
-import java.util.Scanner;
 
 public class HetIndex {
+	// a single HetIndex is created
+	private static HetIndex instance;
+	public static HetIndex getInstance() {
+		if (instance == null) {
+			instance = new HetIndex();
+		}
+		return instance;
+	}
 
-	public static void main(String[] args) {
-		// diffMet indicate the number of different percentage of metilation
-		// among different genes for tumor/cell sample.
-		// the higher diffMet observed, higher is the number of clones
-		//that are necessary to explain this number
-		// This program search to see if the number of clones can be lower than
-		// the diffMet.
 
+	List<Double> metSet = new ArrayList<Double>();
+
+	public static ArrayList<Double> hetIndex(List<Double> metSet, int maxCells) {
+		HashMap<String, Double> observed = new HashMap<String, Double>();
 		int diffMet = 5; // number of different metilated sites. Maximum is 5
 		// int cellNumber = 2;// number of expected clones (cannot be larger
 		// than 4
-
-		int maxCells = 4; // maximum number of cells to be tested
+		//		int maxCells = 4; // maximum number of cells to be tested
 		double okError = 0.0001;// when reached, the search for better
-//		combination of cells and frequency stops
+		//		combination of cells and frequency stops
 		HashMap<String, Double> model = new HashMap<String, Double>();
 		HashMap<String, Double> bestModel = new HashMap<String, Double>();
-		HashMap<String, Double> observed = new HashMap<String, Double>();
 		// HashMap<Integer, Double> result = new HashMap<Integer, Double>();
 		HashMap<Integer, HashMap<Integer, Double>> setHetero = new HashMap<Integer, HashMap<Integer, Double>>();
-		Scanner stdin = new Scanner(System.in).useLocale(Locale.UK); // Create the Scanner.
-		System.out
-				.println("enter number of metilated sites + metilation index ");
-
-		List<Double> metSet = new ArrayList<Double>();
-		double metN = stdin.nextDouble();
-		for (int ii = 0; ii < metN; ii++) {
-			metSet.add(stdin.nextDouble());
-		}
 
 		int count = 0;
 		for (int ii = 0; ii < metSet.size(); ii = ii + 5) {
@@ -52,30 +44,30 @@ public class HetIndex {
 			HashMap<Integer, Double> result = new HashMap<Integer, Double>();
 			// Sets of 4, 3, or 2 populations are managed well.
 			double maxError = 0.0;
-			for (int cellNumber = 1; cellNumber <= maxCells; cellNumber = cellNumber + 1) {
-
+			for (int cellNumber = 1; cellNumber <= maxCells; cellNumber = cellNumber + 1)
+			{
 				double minError = 100000.0;// the minimal difference between
-// observed and the model is set to a large number
+				// observed and the model is set to a large number
 
 				int allPop = (int) (Math.pow(2, diffMet)); // 2^3 = 8, 2^4 = 16
-// generate a string where each population is coded by a two
-// decimal digits (100 different binary number representing 100
-// populations with different metilations)
-// All numbers are stored as strings with the same number of
-// digits (2)
+				// generate a string where each population is coded by a two
+				// decimal digits (100 different binary number representing 100
+				// populations with different metilations)
+				// All numbers are stored as strings with the same number of
+				// digits (2)
 				String allPopString = "";
 				for (int i = 0; i < allPop; i++) {
 					String iString = Integer.toString(i);
 					if (iString.length() < 2)
 						iString = "0" + iString;// add a "0" if it is a single
-												// digit
-												// number
+					// digit
+					// number
 					allPopString = allPopString + iString;
 				}
 
 				// initialize the error from the observed to the model
 				double error1 = 0.0;
-/*
+				/*
 Iteration over the space of parameters and populations
 Method that return all the possible combination of the
 populations in set of size cellNumber. For example if 3
@@ -95,14 +87,14 @@ select 4, 3 or 2 populations
 For 5 diffMet, 32 different populations are possible. If 5 population
 are selected the program may take too long to get an
  answer(32!/(27!)/(5!)combinations are possible)
- */
-		ArrayList<String> populationSet = populationSet(allPopString,
+				 */
+				ArrayList<String> populationSet = populationSet(allPopString,
 						cellNumber);
 
 
-// for each population, a screening of all combinations of
-// proportions are selected
-		int delta = 16;// delta is the number of different proportions
+				// for each population, a screening of all combinations of
+				// proportions are selected
+				int delta = 16;// delta is the number of different proportions
 				// that are considered for each population
 				// in this case, the proportions are evaluated in 16 intervals
 				// populationProp method return a set of all possible
@@ -110,15 +102,15 @@ are selected the program may take too long to get an
 
 				ArrayList<String> populationProp = populationProp(delta,
 						cellNumber);
-//				System.out.println("proportions" + populationProp.size()
-//						+ populationProp);
+				//				System.out.println("proportions" + populationProp.size()
+				//						+ populationProp);
 
-// with the set of all possible combinations of populations
-// (populationSet) and
-// all possible combinations of proportion that add to 1, the
-// predicted metilations
-// are calculated and compared with the observed. The minimum is
-// stored together with the population and the proportion
+				// with the set of all possible combinations of populations
+				// (populationSet) and
+				// all possible combinations of proportion that add to 1, the
+				// predicted metilations
+				// are calculated and compared with the observed. The minimum is
+				// stored together with the population and the proportion
 				String bestPop = "";
 				String bestProp = ""; 
 				search: {
@@ -146,7 +138,7 @@ are selected the program may take too long to get an
 				System.out.println("\ncell number " + cellNumber);
 				System.out.println("minerror " + minError);
 				System.out
-						.println("best population " + bestPop);
+				.println("best population " + bestPop);
 				System.out.print("proportion ");
 				System.out.print(bestProp + "  ");
 				System.out.println("");
@@ -167,17 +159,20 @@ are selected the program may take too long to get an
 			count = count + 1;
 
 		}
+		ArrayList<Double> resultsHI = new ArrayList<Double>();
 		for (int i = 0; i < count; i++) 
-			{
-			double sumErr = sumErr(setHetero.get(i));
-			System.out.println(sumErr);
-			}
+		{
+			Double sumErr = sumErr(setHetero.get(i));
+			resultsHI.add(sumErr);
+			System.out.println(i +"   "+ sumErr);
+		}
+		return resultsHI;
 	}
 
 	private static double sumErr(HashMap<Integer, Double> setHetero) {
 		double sumErr = 0;
 		int cellsMax = setHetero.keySet().size()-1;
-//		when the error increases instead of decreasing it takes the error value of the lowest
+		//		when the error increases instead of decreasing it takes the error value of the lowest
 		for (int i = 1 ; i <= cellsMax; i++){
 			if (setHetero.get(i-1)<setHetero.get(i)) setHetero.put(i, setHetero.get(i-1));
 		}
@@ -186,7 +181,7 @@ are selected the program may take too long to get an
 		}
 		return sumErr ;	
 	}
-	
+
 	private static void getValues() {
 		// TODO Auto-generated method stub
 		GetValues.main();
@@ -229,7 +224,7 @@ are selected the program may take too long to get an
 	public static ArrayList<String> populationSet(String data, int howMany) {
 		ArrayList<String> populationSet = new ArrayList<String>();
 		populationSet = choose(populationSet, data, howMany,
-		new StringBuffer(), 0);
+				new StringBuffer(), 0);
 		return populationSet;
 
 	}
