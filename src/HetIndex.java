@@ -1,5 +1,4 @@
 
-//import java.io.BufferedReader;populationProp
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -22,10 +21,12 @@ public class HetIndex {
 
 	public static ArrayList<Double> hetIndex(List<Double> metSet, int maxCells) {
 		HashMap<String, Double> observed = new HashMap<String, Double>();
-		int diffMet = 5; // number of different metilated sites. Maximum is 5
-		// int cellNumber = 2;// number of expected clones (cannot be larger
-		// than 4
-		//		int maxCells = 4; // maximum number of cells to be tested
+		int diffMet = 5; // number of different metilated sites.  It is set to 5
+		// number of combined pure clones (maxCells).  In this algorithm, 5 clones are
+		// managed fast enough.  In the old algorithm, 4 was a limit and it was very slow
+		// 
+		// The method will try to fit the observed data with 1 to 5 clones
+		// Each clone is a combination of five 0-or-1 digits.  2^5 clones are possible
 		double okError = 0.0001;// when reached, the search for better
 		//		combination of cells and frequency stops
 		HashMap<String, Double> model = new HashMap<String, Double>();
@@ -33,6 +34,24 @@ public class HetIndex {
 		// HashMap<Integer, Double> result = new HashMap<Integer, Double>();
 		HashMap<Integer, HashMap<Integer, Double>> setHetero = new HashMap<Integer, HashMap<Integer, Double>>();
 
+		int allPop = (int) (Math.pow(2, diffMet)); // 2^5 = 32
+		// generate a string where each population is coded by a two
+		// decimal digits (This will work for diffMet up to 6 2^6 = 64)
+		// All numbers are stored as strings with the same number of
+		// digits (2)
+		String allPopString = "";
+		for (int i = 0; i < allPop; i++) {
+			String iString = Integer.toString(i);
+			if (iString.length() < 2)
+				iString = "0" + iString;// add a "0" if it is a single
+			// digit
+			// number
+			allPopString = allPopString + iString;
+		}
+System.out.println(allPopString);
+		
+		//Loop taking set of five values from the metSet (methylation set) sent 
+		// by the main and loaded in the hetIndex method
 		int count = 0;
 		for (int ii = 0; ii < metSet.size(); ii = ii + 5) {
 			observed.put("M0", metSet.get(ii + 0));
@@ -44,55 +63,34 @@ public class HetIndex {
 			HashMap<Integer, Double> result = new HashMap<Integer, Double>();
 			// Sets of 4, 3, or 2 populations are managed well.
 			double maxError = 0.0;
+			String bestPop = "";
+			//Loop fitting the observed values using 1 to 5 clones
 			for (int cellNumber = 1; cellNumber <= maxCells; cellNumber = cellNumber + 1)
 			{
 				double minError = 100000.0;// the minimal difference between
 				// observed and the model is set to a large number
-
-				int allPop = (int) (Math.pow(2, diffMet)); // 2^3 = 8, 2^4 = 16
-				// generate a string where each population is coded by a two
-				// decimal digits (100 different binary number representing 100
-				// populations with different metilations)
-				// All numbers are stored as strings with the same number of
-				// digits (2)
-				String allPopString = "";
-				for (int i = 0; i < allPop; i++) {
-					String iString = Integer.toString(i);
-					if (iString.length() < 2)
-						iString = "0" + iString;// add a "0" if it is a single
-					// digit
-					// number
-					allPopString = allPopString + iString;
-				}
-
 				// initialize the error from the observed to the model
 				double error1 = 0.0;
 				/*
 Iteration over the space of parameters and populations
-Method that return all the possible combination of the
-populations in set of size cellNumber. For example if 3
-different metilations are evident and we may want to obtain the best 3
-populations with the corresponding proportions of each.
-Since the metilation site can be off/on, it can be represented by
- a binary number. The possibilities of off/on of three metilation site
-in an aploid cell then can be represented by a binary number. For 3 distinct
- metilation sites, then 2^3=8 population are possible and all combinations of 3
- out of the 8 are returned.
- If we want the best result but with only 2 clones, the we
- must screen  for  all possible combination two cell from the 8 population set,
- and search for eacho of them, the best proportion to minimize the difference between
- the model and the observed.
- For diffMet = 4, 16 different populations are possible. We may
-select 4, 3 or 2 populations 
-For 5 diffMet, 32 different populations are possible. If 5 population
-are selected the program may take too long to get an
- answer(32!/(27!)/(5!)combinations are possible)
+The population set in this algorithm is constructed choosing the best fit with
+one population. Then try the best fit including this clone and some of the other 32 clones.
+Then trying the best fit adding a third clone and so on.
+At each step, the proportion of each clone is re-tested
+
 				 */
-				ArrayList<String> populationSet = populationSet(allPopString,
-						cellNumber);
+				ArrayList<String> singlePopulationSet = populationSet(allPopString,
+						1);
+				//bestPop is initially "" and then is replaced by the best combination
+				// of 1, 2, 3 .... clones.  The loop add this clones to the possible 32 clones
+				// to be tested in all possible proportions to get the best one
+				ArrayList<String> populationSet = new ArrayList<String>();
+				for (String s : singlePopulationSet){
+					populationSet.add(bestPop + s);
+				}
 
-
-				// for each population, a screening of all combinations of
+				System.out.println(populationSet + "NUEVO" + bestPop);
+				// for each population set, a screening of all combinations of
 				// proportions are selected
 				int delta = 16;// delta is the number of different proportions
 				// that are considered for each population
@@ -102,16 +100,13 @@ are selected the program may take too long to get an
 
 				ArrayList<String> populationProp = populationProp(delta,
 						cellNumber);
-				//				System.out.println("proportions" + populationProp.size()
-				//						+ populationProp);
-
 				// with the set of all possible combinations of populations
 				// (populationSet) and
 				// all possible combinations of proportion that add to 1, the
-				// predicted metilations
+				// predicted methylations
 				// are calculated and compared with the observed. The minimum is
 				// stored together with the population and the proportion
-				String bestPop = "";
+//				String bestPop = "";
 				String bestProp = ""; 
 				search: {
 					for (String s : populationSet) {
@@ -187,8 +182,6 @@ are selected the program may take too long to get an
 		GetValues.main();
 	}
 
-
-
 	public static ArrayList<String> populationProp(int delta, int cellNumber) {
 		ArrayList<String> populationProp = new ArrayList<String>();
 		if (cellNumber == 1) {
@@ -225,6 +218,7 @@ are selected the program may take too long to get an
 		ArrayList<String> populationSet = new ArrayList<String>();
 		populationSet = choose(populationSet, data, howMany,
 				new StringBuffer(), 0);
+		System.out.println(populationSet);
 		return populationSet;
 
 	}

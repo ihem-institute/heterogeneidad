@@ -21,7 +21,7 @@ public class HetIndexMain {
 
 		int diffMet = 5; // number of different metilated sites. Maximum is 5
 
-		int maxCells = 3; // maximum number of cells to be tested
+		int maxCells = 5; // maximum number of cells to be tested
 
 		Scanner stdin = new Scanner(System.in).useLocale(Locale.UK); // Create the Scanner.
 		System.out
