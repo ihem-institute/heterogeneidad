@@ -1,0 +1,16 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Heterogeneidad</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+</head>
+<body>
+	<h1>Heterogeneidad</h1>
+    <form action="#" th:action="@{/result}" th:object="${heterogeneidad}" method="post">
+    	<p>maxCells: <input type="text" th:field="*{maxCells}" /></p>
+        <p>mets: <textarea rows="10" cols="70"th:field="*{mets}" ></textarea></p>
+        <p><input type="submit" value="Submit" /> 
+        <input type="reset" value="Reset" /></p>
+    </form>
+</body>
+</html>

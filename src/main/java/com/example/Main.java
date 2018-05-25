@@ -16,22 +16,32 @@
 
 package com.example;
 
+
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+import heterogeneidad.HetIndex;
+
 import javax.sql.DataSource;
+
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 @Controller
@@ -48,7 +58,26 @@ public class Main {
     SpringApplication.run(Main.class, args);
   }
 
-  @RequestMapping("/")
+  @GetMapping("/")
+  public String heterogeneidadForm(Model model) {
+      model.addAttribute("heterogeneidad", new Heterogeneidad());
+      return "heterogeneidad";
+  }
+
+  @PostMapping("/result")
+  public String heterogeneidadSubmit(@ModelAttribute Heterogeneidad heterogeneidad, Map<String, Object> model) {
+	  List<Double> metSet = new ArrayList<Double>();
+	  String[] mets = heterogeneidad.getMets().split("\n");
+	  for( String met : mets ) {
+		  metSet.add(Double.valueOf(met));
+	  }
+	ArrayList<Double> resultsHI = HetIndex.hetIndex(metSet , heterogeneidad.getMaxCells());
+	  System.out.println("results " + resultsHI);
+	  model.put("result", resultsHI.toString());
+      return "heterogeneidad_result";
+  }
+  
+  @RequestMapping("/index")
   String index() {
     return "index";
   }
